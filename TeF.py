@@ -33,7 +33,6 @@ def echo(update, context):
 def get(update, context):
     r = requests.get(url= URL)
     tree = html.fromstring(r.content)
-    print(1)
     post_link_list = tree.xpath("//a[contains(@class, 'post__title_link')]/@href") 
     for link in post_link_list:
         update.message.reply_text(link)
