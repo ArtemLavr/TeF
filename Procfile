@@ -1,1 +1,1 @@
-web: python3 Tef.py
+web: python3 TeF.py
