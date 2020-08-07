@@ -3,9 +3,13 @@
 import logging
 import requests
 from lxml import html 
-from telegram.ext import Updater, CommandHandler, MessageHandler, Filters
+from telegram.ext import Updater, CommandHandler, MessageHandler, Filters,  CallbackQueryHandler
+from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 
-URL = "https://habr.com/ru/"
+
+
+
+"https://habr.com/ru/"
 
 # Enable logging
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
@@ -23,21 +27,41 @@ def start(update, context):
 
 def help_command(update, context):
     """Send a message when the command /help is issued."""
-    update.message.reply_text('Help!')
-
+    update.message.reply_text("Отправь команду /habr для получения актуальных статей")
+    
 
 def echo(update, context):
 
     """Echo the user message."""    
     update.message.reply_text(update.message.text)
-def get(update, context):
+
+
+def habr(update, context):
+    
+    keyboard = [
+        [InlineKeyboardButton("Главная страница", callback_data= "habr_main")],
+        [InlineKeyboardButton("Машинное обучение", callback_data="habr_ml")
+        ]]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    update.message.reply_text('Please choose:', reply_markup=reply_markup)
+
+def get_articls(query, URL):
     r = requests.get(url= URL)
     tree = html.fromstring(r.content)
     post_link_list = tree.xpath("//a[contains(@class, 'post__title_link')]/@href") 
     for link in post_link_list:
-        update.message.reply_text(link)
+        query.message.reply_text(link)
 
-
+def callback_query_handler(update, context):
+    query = update.callback_query
+    query.answer()
+    cqd = query.data
+    if cqd == "habr_main":
+        URL = "https://habr.com/ru/"
+        get_articls(query, URL)
+    elif cqd == "habr_ml":
+        URL = "https://habr.com/ru/hub/machine_learning/"
+        get_articls(query, URL)
 
 def main():
     """Start the bot."""
@@ -52,7 +76,8 @@ def main():
     # on different commands - answer in Telegram
     dp.add_handler(CommandHandler("start", start))
     dp.add_handler(CommandHandler("help", help_command))
-    dp.add_handler(CommandHandler("get", get))
+    dp.add_handler(CommandHandler("habr", habr))
+    dp.add_handler(CallbackQueryHandler(callback_query_handler))
     # on noncommand i.e message - echo the message on Telegram
     dp.add_handler(MessageHandler(Filters.text & ~Filters.command, echo))
 
