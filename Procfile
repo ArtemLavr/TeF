@@ -1,1 +1,1 @@
-web: python3 TeF.py
+worker: python3 TeF.py
