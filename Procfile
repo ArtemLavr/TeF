@@ -1,1 +1,1 @@
-worker: python3 TeF.py
+worker: python TeF.py
